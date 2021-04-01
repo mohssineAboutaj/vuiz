@@ -20,12 +20,18 @@
 
     <v-main class="primary">
       <v-container class="fill-height justify-center">
-        <Quiz v-if="startQuiz" :questions.sync="questions" />
+        <Quiz
+          v-if="startQuiz"
+          v-on:cancel-quiz="startQuiz = !startQuiz"
+          :questions.sync="questions"
+        />
         <v-card v-else class="text-capitalize" elevation="4">
           <v-card-title class="justify-center">quiz app</v-card-title>
-          <v-card-subtitle>choose the options</v-card-subtitle>
+          <v-card-subtitle class="mb-5 mt-2">
+            choose the options, to start the quiz
+          </v-card-subtitle>
           <v-card-text>
-            <v-select
+            <v-autocomplete
               :items="categories"
               v-model="category"
               label="Select Category"
@@ -37,7 +43,7 @@
               prepend-icon="fa-graduation-cap"
               filled
               hint="If you didn't choice you will get random category questions"
-            ></v-select>
+            ></v-autocomplete>
             <v-select
               :items="diffs"
               v-model="diff"
@@ -53,7 +59,7 @@
               label="Select Questions Type"
               persistent-hint
               single-line
-              prepend-icon="fa-list"
+              prepend-icon="fa-tasks"
               filled
             ></v-select>
           </v-card-text>
@@ -77,71 +83,74 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator"
-import Quiz from "./components/Quiz.vue"
-import axios from "axios"
-import { Category } from "./types"
+import { Component, Vue, Watch } from "vue-property-decorator";
+import Quiz from "./components/Quiz.vue";
+import axios from "axios";
+import { Category, Question } from "./types";
 
 @Component({
-  components: { Quiz },
+  components: { Quiz }
 })
 export default class App extends Vue {
   // data
   /// amount
-  amount = 10
+  amount?: number = 10;
   /// category
-  category: Category = {}
-  categories: Category[] = []
+  category: Category = {};
+  categories: Category[] = [];
   /// diff
-  diff = ""
-  diffs = ["easy", "medium", "hard"]
+  diff?: string = "";
+  diffs: string[] = ["easy", "medium", "hard"];
   /// type
-  types = ["boolean", "multiple"]
-  type = this.types[0]
+  types: string[] = ["boolean", "multiple"];
+  type: string = this.types[0];
   /// questions
-  questions = []
+  questions: Question[] = [];
   /// start it
-  startQuiz = false
-  loading = false
+  startQuiz?: boolean = false;
+  loading?: boolean = false;
 
   // hooks
   created(): void {
     axios.get("https://opentdb.com/api_category.php").then(({ data }) => {
-      data.trivia_categories.forEach((c: never): void => {
-        this.categories.push(c)
-      })
-    })
+      data.trivia_categories.forEach((c: Category): void => {
+        this.categories.push(c);
+      });
+    });
   }
 
   // methods
   getQuestions(): void {
-    this.loading = true
+    this.loading = true;
 
-    let url = `https://opentdb.com/api.php?amount=${this.amount}&difficulty=${this.diff}&type=${this.type}`
+    /// api url
+    let apiURL = `https://opentdb.com/api.php?amount=${this.amount}&difficulty=${this.diff}&type=${this.type}`;
 
     if (this.category.id) {
-      url += `&category=${this.category.id}`
+      apiURL += `&category=${this.category.id}`;
     }
 
     axios
-      .get(url)
+      .get(apiURL)
       .then(({ data: { results } }): void => {
-        results.forEach((q: never): void => {
-          this.questions.push(q)
-        })
+        results.forEach((q: Question): void => {
+          this.questions.push(q);
+        });
       })
       .then(() => {
-        // this.questions.map((q) => {
-        //   if (this.type === "boolean") {
-        //     q.correct_answer = JSON.parse(q.correct_answer.toLowerCase())
-        //     q.incorrect_answers[0] = JSON.parse(
-        //       q.incorrect_answers[0].toLowerCase(),
-        //     )
-        //   }
-        // })
-        this.startQuiz = true
-        this.loading = false
-      })
+        this.startQuiz = true;
+        this.loading = false;
+      });
+  }
+
+  // watch
+  @Watch("startQuiz") startQuizChanged(v: boolean): void {
+    if (!v) {
+      this.questions = [];
+      this.diff = "";
+      this.category = {};
+      this.type = this.types[0];
+    }
   }
 }
 </script>
