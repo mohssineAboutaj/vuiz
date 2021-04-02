@@ -2,6 +2,7 @@
 
 - [vuiz](#vuiz)
   - [About](#about)
+  - [Demo](#demo)
   - [Project setup](#project-setup)
     - [Compiles and hot-reloads for development](#compiles-and-hot-reloads-for-development)
     - [Compiles and minifies for production](#compiles-and-minifies-for-production)
@@ -12,6 +13,10 @@
 ## About
 
 A basic quiz app built with Vue + TypeScript, Vuetifyjs
+
+## Demo
+
+[Live Preview](https://vuiz.netlify.app/)
 
 ## Project setup
 
