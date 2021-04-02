@@ -3,7 +3,7 @@
     <v-card :min-height="mh" min-width="400" max-width="500">
       <v-card-title class="justify-center headline text-capitalize">
         <template v-if="current < steps">
-          question {{ current }}/{{ steps - 1 }}
+          question {{ current }}/{{ questionsLength }}
         </template>
         <template v-else>
           quiz finished
@@ -47,13 +47,14 @@
                     </v-radio-group>
                   </template>
                   <template v-else>
-                    <div class="display-1 text-capitalize">
-                      <p>Thank you for participating in our quiz!</p>
-
-                      <p>
-                        please click <b>submit</b> button to get your result
-                      </p>
-                    </div>
+                    <v-list class="text-capitalize headline">
+                      <v-list-item>
+                        Thank you for participating in our quiz!
+                      </v-list-item>
+                      <v-list-item>
+                        please click submit button to get your result
+                      </v-list-item>
+                    </v-list>
                   </template>
                 </v-form>
               </v-stepper-content>
@@ -93,39 +94,45 @@
                 {{ points }}%
               </v-progress-circular>
             </v-row>
-            <v-alert color="dark" icon="fa-clock">
-              your time is <b>{{ quizTime }}</b>
-            </v-alert>
+            <v-list class="text-capitalize">
+              <v-list-item>
+                <v-list-item-icon>
+                  <v-icon>fa-clock</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>
+                    your time is <b>{{ quizTime }}</b>
+                  </v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-icon>
+                  <v-icon>fa-tasks</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>
+                    you have answered to {{ passed }} from {{ questionsLength }}
+                  </v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
           </div>
         </template>
       </v-card-text>
       <v-card-actions>
         <v-row class="justify-space-around">
-          <template v-if="!showResult">
-            <template v-for="(btn, b) in footerButtons">
-              <v-btn
-                v-if="btn.renderIt"
-                :key="b"
-                :color="btn.color"
-                rounded
-                large
-                :disabled="btn.disabled"
-                @click="btn.cb()"
-                class="my-4"
-              >
-                {{ btn.text }}
-              </v-btn>
-            </template>
-          </template>
-          <template v-else>
+          <template v-for="(btn, b) in footerButtons">
             <v-btn
-              color="primary"
+              v-if="btn.renderIt"
+              :key="b"
+              :color="btn.color"
               rounded
               large
-              @click="cancelQuiz()"
+              :disabled="btn.disabled"
               class="my-4"
+              @click="btn.cb()"
             >
-              restart
+              {{ btn.text }}
             </v-btn>
           </template>
         </v-row>
@@ -164,6 +171,8 @@ export default class Quiz extends Vue {
   startTime = 0;
   endTime = 0;
   quizTime?: string = "";
+  questionsLength = 0;
+  passed = 0;
   /// quiz data
   current = 1;
   steps = 1;
@@ -171,7 +180,7 @@ export default class Quiz extends Vue {
   /// alert
   answerAlert?: boolean = false;
   /// result
-  showResult?: boolean = false;
+  showResult = false;
   waitingResult?: boolean = true;
   points = 0;
   // cancel
@@ -181,13 +190,22 @@ export default class Quiz extends Vue {
   get footerButtons(): FooterButton[] {
     return [
       {
+        text: "restart",
+        color: "primary",
+        disabled: false,
+        cb: () => {
+          this.cancelQuiz();
+        },
+        renderIt: this.showResult
+      },
+      {
         text: "cancel",
         color: "error",
         disabled: false,
         cb: () => {
           this.cancelDialog = true;
         },
-        renderIt: true
+        renderIt: !this.showResult
       },
       {
         text: "submit",
@@ -203,19 +221,21 @@ export default class Quiz extends Vue {
             const answer = Array.isArray(ans) ? ans[0] : ans;
             if (this.questions[i].correct_answer === answer) {
               this.points++;
+              this.passed++;
             }
           });
           this.endTime = Date.now();
           setTimeout(() => {
-            this.points = parseInt(
-              ((this.points / (this.steps - 1)) * 100).toFixed(0)
-            );
+            this.points =
+              parseInt(
+                ((this.points / this.questionsLength) * 100).toFixed(0)
+              ) || 0;
 
             this.waitingResult = false;
             this.quizTime = humanizeDuration(this.endTime - this.startTime);
           }, 5000);
         },
-        renderIt: !(this.current < this.steps)
+        renderIt: !(this.current < this.steps) && !this.showResult
       },
       {
         text: "next",
@@ -252,9 +272,6 @@ export default class Quiz extends Vue {
       type: "final",
       label: "thanks"
     });
-
-    // get items count
-    this.steps = this.questions.length;
   }
   mounted(): void {
     this.startTime = Date.now();
@@ -266,6 +283,10 @@ export default class Quiz extends Vue {
       this.current = val;
     }
   }
+  @Watch("questions") questionsChanged(v: Question[]): void {
+    this.questionsLength = v.length - 1;
+    this.steps = this.questionsLength + 1;
+  }
 
   // methods
   nextStep(n: number): void {
@@ -273,7 +294,7 @@ export default class Quiz extends Vue {
       this.current = 1;
     } else {
       if (!isEmpty(this.questions[this.current - 1].value)) {
-        this.current = n + 1;
+        this.current++;
         this.answerAlert = false;
       } else {
         this.answerAlert = true;
