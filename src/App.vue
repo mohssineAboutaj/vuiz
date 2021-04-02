@@ -23,75 +23,103 @@
         :height="height"
       >
         <v-container class="fill-height justify-center">
-          <Quiz
-            v-if="startQuiz"
-            v-on:cancel-quiz="startQuiz = !startQuiz"
-            :questions.sync="questions"
-          />
-          <v-card v-else class="text-capitalize" elevation="4">
-            <v-card-title class="justify-center">quiz app</v-card-title>
-            <v-card-subtitle class="mb-5 mt-2">
-              choose the options, to start the quiz
-            </v-card-subtitle>
-            <v-card-text>
-              <v-autocomplete
-                :items="categories"
-                v-model="category"
-                label="Select Category"
-                item-text="name"
-                item-value="name"
-                persistent-hint
-                single-line
-                return-object
-                prepend-icon="fa-graduation-cap"
-                filled
-                hint="If you didn't choice you will get random category questions"
-              ></v-autocomplete>
-              <v-select
-                :items="diffs"
-                v-model="diff"
-                label="Select Difficulty"
-                persistent-hint
-                single-line
-                prepend-icon="fa-layer-group"
-                filled
-              ></v-select>
-              <v-select
-                :items="types"
-                v-model="type"
-                label="Select Questions Type"
-                persistent-hint
-                single-line
-                prepend-icon="fa-tasks"
-                filled
-              ></v-select>
-              <v-col cols="12">
-                <v-subheader class="pl-0">
-                  Select Questions Count
-                </v-subheader>
-                <v-slider
-                  v-model="amount"
-                  thumb-label="always"
-                  max="50"
-                  min="1"
-                  prepend-icon="fa-file-alt"
-                ></v-slider>
-              </v-col>
-            </v-card-text>
-            <v-card-actions>
-              <v-btn
-                class="text-center"
-                color="primary"
-                block
-                @click="getQuestions()"
-                :disabled="!diff"
-                :loading="loading"
-              >
-                <span class="mr-2">get started</span>
-                <v-icon>fa-angle-double-right</v-icon>
-              </v-btn>
-            </v-card-actions>
-          </v-card>
+          <template v-if="!gettingStarter">
+            <v-card
+              class="text-capitalize"
+              color="transparent"
+              dark
+              elevation="0"
+            >
+              <v-card-title class="justify-center display-3">
+                vuiz
+              </v-card-title>
+              <v-card-subtitle class="justify-center display-1 mt-4 mb-10">
+                take the quiz &amp; test your knowledge
+              </v-card-subtitle>
+              <v-card-actions class="justify-center">
+                <v-btn
+                  large
+                  elevation="2"
+                  class="white primary--text pa-4"
+                  rounded
+                  @click="gettingStarter = true"
+                >
+                  getting started
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </template>
+          <template v-else>
+            <Quiz
+              v-if="startQuiz"
+              v-on:cancel-quiz="startQuiz = !startQuiz"
+              :questions.sync="questions"
+            />
+            <v-card v-else class="text-capitalize" elevation="4">
+              <v-card-title class="justify-center">quiz app</v-card-title>
+              <v-card-subtitle class="mb-5 mt-2">
+                choose the options, to start the quiz
+              </v-card-subtitle>
+              <v-card-text>
+                <v-autocomplete
+                  :items="categories"
+                  v-model="category"
+                  label="Select Category"
+                  item-text="name"
+                  item-value="name"
+                  persistent-hint
+                  single-line
+                  return-object
+                  prepend-icon="fa-graduation-cap"
+                  filled
+                  hint="If you didn't choice you will get random category questions"
+                ></v-autocomplete>
+                <v-select
+                  :items="diffs"
+                  v-model="diff"
+                  label="Select Difficulty"
+                  persistent-hint
+                  single-line
+                  prepend-icon="fa-layer-group"
+                  filled
+                ></v-select>
+                <v-select
+                  :items="types"
+                  v-model="type"
+                  label="Select Questions Type"
+                  persistent-hint
+                  single-line
+                  prepend-icon="fa-tasks"
+                  filled
+                ></v-select>
+                <v-col cols="12">
+                  <v-subheader class="pl-0">
+                    Select Questions Count
+                  </v-subheader>
+                  <v-slider
+                    v-model="amount"
+                    thumb-label="always"
+                    max="50"
+                    min="1"
+                    prepend-icon="fa-file-alt"
+                  ></v-slider>
+                </v-col>
+              </v-card-text>
+              <v-card-actions>
+                <v-btn
+                  class="text-center"
+                  color="primary"
+                  block
+                  @click="getQuestions()"
+                  :disabled="!diff"
+                  :loading="loading"
+                >
+                  <span class="mr-2">get started</span>
+                  <v-icon>fa-angle-double-right</v-icon>
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </template>
         </v-container>
       </v-parallax>
     </v-main>
@@ -122,6 +150,7 @@ export default class App extends Vue {
   // data
   /// paralax
   height?: number = 100;
+  gettingStarter = false;
   /// amount
   amount?: number = 10;
   /// category

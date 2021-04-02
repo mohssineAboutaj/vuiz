@@ -1,8 +1,9 @@
 {
   "name": "vuiz",
-  "description": "A basic quiz app built with vue + typescript, vuetifyjs",
-  "version": "1.0.0",
-  "private": true,
+  "description": "A basic quiz app built with vue + typescript (class-component style), vuetifyjs, opentdb API",
+  "version": "1.0.1",
+  "author": "Mohssine Aboutaj",
+  "license": "MIT",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -37,5 +38,24 @@
     "vue-cli-plugin-vuetify": "~2.3.1",
     "vue-template-compiler": "^2.6.11",
     "vuetify-loader": "^1.7.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohssineAboutaj/vuiz.git"
+  },
+  "keywords": [
+    "quiz",
+    "quiz app",
+    "vue",
+    "typeScript",
+    "Vuetifyjs",
+    "FontAwesome icons",
+    "api",
+    "questions",
+    "test"
+  ],
+  "bugs": {
+    "url": "https://github.com/mohssineAboutaj/vuiz/issues"
+  },
+  "homepage": "https://github.com/mohssineAboutaj/vuiz#readme"
 }

@@ -12,7 +12,8 @@
 
 ## About
 
-A basic quiz app built with Vue + TypeScript, Vuetifyjs
+A basic quiz app built with [Vue + TypeScript](https://vuejs.org/v2/guide/typescript.html) class-component style, [Vuetifyjs Material Design](http://vuetifyjs.com/) & the [Ppentdb API](https://opentdb.com)
+You can choose from the categories, select the quiz level, choose the questions type (_True/False_ or _Multiple choices_), also you can choose the questions count
 
 ## Demo
 
